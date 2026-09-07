@@ -5,15 +5,22 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   orders-service:
     build: ./OrdersService
     container_name: orders-service
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   notification-service:
     build: ./NotificationService
     container_name: notification-service
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
